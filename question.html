@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Trắc Nghiệm Kiến Thức Quản Trị (Nâng cấp)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .correct {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        .incorrect {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .nav-btn {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        .nav-btn:hover {
+            background-color: #4338ca; /* indigo-700 */
+        }
+        .nav-btn:disabled {
+            background-color: #a5b4fc; /* indigo-300 */
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="w-full max-w-3xl mx-auto">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">Game Trắc Nghiệm Quản trị Kinh doanh</h1>
+            <p class="text-gray-600 dark:text-gray-300 mb-8">
+                Các câu hỏi sẽ được xáo trộn ngẫu nhiên. Bạn có thể di chuyển tới hoặc lùi giữa các câu hỏi.
+            </p>
+            <button id="start-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg shadow-md">
+                Bắt đầu
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-lg">
+            <div id="header" class="flex justify-between items-center mb-6">
+                <div id="progress" class="text-lg font-semibold text-indigo-600 dark:text-indigo-400">Câu 1/91</div>
+                <div id="score-preview" class="text-lg font-semibold text-green-600 dark:text-green-400">Điểm: 0</div>
+            </div>
+            <div id="section-title" class="text-center text-xl font-bold text-gray-700 dark:text-gray-200 mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+            <div id="question-container" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-white leading-relaxed"></p>
+            </div>
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Options will be inserted here by JavaScript -->
+            </div>
+            <div id="navigation-container" class="mt-8 flex justify-between items-center">
+                <button id="prev-btn" class="nav-btn">
+                    &larr; Quay lại
+                </button>
+                <button id="next-btn" class="nav-btn">
+                    Tiếp theo &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">Hoàn thành!</h2>
+            <p class="text-xl text-gray-600 dark:text-gray-300 mb-6">Bạn đã trả lời hết các câu hỏi.</p>
+            <div class="text-2xl font-bold mb-8">
+                <span class="text-gray-800 dark:text-white">Điểm cuối cùng của bạn: </span>
+                <span id="final-score" class="text-green-500"></span>
+            </div>
+            <button id="restart-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg shadow-md">
+                Chơi lại
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA NGÂN HÀNG CÂU HỎI ---
+        const quizData = [
+            {
+                section: "PHẦN 1: KIẾN THỨC NỀN TẢNG VỀ QUẢN TRỊ",
+                questions: [
+                    { q: "Hoạt động quản trị là tập hợp các hành động cần thiết khi nhiều cá nhân cùng hợp tác trong một tổ chức nhằm đạt được điều gì chung?", o: ["Lợi nhuận tối đa", "Kế hoạch đã đề ra", "Lợi ích của cổ đông", "Mục tiêu của tổ chức"], a: "Mục tiêu của tổ chức" },
+                    { q: "Theo thuyết X của Douglas McGregor, đặc điểm cố hữu của người lao động là gì khiến họ có xu hướng né tránh công việc nếu có thể?", o: ["Không thích làm việc", "Thích làm việc và chủ động", "Thích thể hiện cá tính và sáng tạo", "Không thích sự ràng buộc trong công việc"], a: "Không thích làm việc" },
+                    { q: "Đâu là yếu tố KHÔNG thuộc nhóm yếu tố lựa chọn mô hình tổ chức dự án thuộc về bản thân dự án?", o: ["Tầm quan trọng của dự án", "Mức độ hạn chế về thời gian và ngân sách", "Tính sáng tạo và phức tạp của dự án", "Văn hóa doanh nghiệp và hệ thống quản lý hiện tại"], a: "Văn hóa doanh nghiệp và hệ thống quản lý hiện tại" },
+                    { q: "Phương pháp AOA (Activity on Arrow) trong quản lý dự án chủ yếu biểu diễn loại mối quan hệ nào giữa các công việc?", o: ["Mối quan hệ Bắt đầu - Bắt đầu (SS)", "Mối quan hệ Kết thúc - Bắt đầu (SF)", "Mối quan hệ Kết thúc - Kết thúc (FF)", "Mối quan hệ Bắt đầu - Kết thúc (FS)"], a: "Mối quan hệ Bắt đầu - Kết thúc (FS)" },
+                    { q: "Trong sơ đồ PERT, 'đường găng' (critical path) được định nghĩa là gì?", o: ["Đường dài nhất, nối điểm đầu và điểm cuối của dự án", "Đường dài nhất, nhưng có thể rút ngắn thời gian thực hiện", "Đường nối tất cả các sự kiện quan trọng của dự án", "Đường dài nhất, không nhất thiết phải bao gồm các công việc găng"], a: "Đường dài nhất, nối điểm đầu và điểm cuối của dự án" },
+                    { q: "Trong quy trình lập kế hoạch dự án, bước 'dự toán kinh phí và phân bổ nguồn lực' thường nằm ở giai đoạn nào của quy trình?", o: ["Bước 3", "Bước 4", "Bước 5", "Bước 6"], a: "Bước 4" },
+                    { q: "Chỉ số SPI (Schedule Performance Index) trong quản lý dự án thể hiện tỷ số giữa yếu tố nào?", o: ["Giá trị thu được và chi phí thật sự", "Giá trị thu được (Earned Value) và giá trị kế hoạch (Planned Value)", "Giá trị thu được và chi phí phát sinh thực tế", "Tất cả các phương án trên đều đúng"], a: "Giá trị thu được (Earned Value) và giá trị kế hoạch (Planned Value)" },
+                    { q: "Phương pháp 'Đường cong chữ S' (S-Curve) trong quản lý dự án thường được sử dụng để cho biết điều gì?", o: ["Sự khác biệt giữa chi phí kế hoạch và chi phí thực tế theo thời gian", "Chi phí bị giới hạn không vượt qua ngân sách đã duyệt", "Sự cần thiết phải kiểm soát chi phí thực tế một cách chặt chẽ", "Tất cả các phương án trên đều đúng"], a: "Tất cả các phương án trên đều đúng" },
+                    { q: "Phương pháp ước tính chi phí 'từ dưới lên' (Bottom-up estimating) thường phù hợp nhất với loại dự án nào?", o: ["Có rủi ro cao và phức tạp", "Có quy mô nhỏ và phạm vi công việc rõ ràng", "Có phạm vi không ổn định và hay thay đổi", "Tất cả các phương án trên đều đúng"], a: "Có quy mô nhỏ và phạm vi công việc rõ ràng" },
+                    { q: "Theo PMBOK Guide, quy trình quản trị dự án bao gồm những giai đoạn chính nào?", o: ["Thực hiện dự án, Lập kế hoạch, Kết thúc", "Khởi tạo, Lập kế hoạch, Thực hiện, Giám sát & Kiểm soát, Kết thúc", "Lập kế hoạch, Thực hiện, Kiểm soát, Kết thúc", "Tất cả các phương án trên đều có thể là cách diễn giải các nhóm quy trình chính"], a: "Khởi tạo, Lập kế hoạch, Thực hiện, Giám sát & Kiểm soát, Kết thúc" },
+                    { q: "Ma trận IFE (Internal Factor Evaluation) trong phân tích chiến lược được sử dụng để đánh giá yếu tố nào?", o: ["Các yếu tố bên ngoài ảnh hưởng đến doanh nghiệp", "Các yếu tố bên trong của doanh nghiệp (điểm mạnh, điểm yếu)", "Tổng hợp điểm mạnh, điểm yếu, cơ hội, đe dọa", "Tất cả đều sai"], a: "Các yếu tố bên trong của doanh nghiệp (điểm mạnh, điểm yếu)" },
+                    { q: "Ma trận EFE (External Factor Evaluation) trong phân tích chiến lược được sử dụng để đánh giá yếu tố nào?", o: ["Các yếu tố bên trong của doanh nghiệp", "Các yếu tố bên ngoài tác động đến doanh nghiệp (cơ hội, thách thức)", "Ma trận điểm mạnh điểm yếu, cơ hội, đe dọa", "Tất cả đều sai"], a: "Các yếu tố bên ngoài tác động đến doanh nghiệp (cơ hội, thách thức)" },
+                    { q: "Trong các phát biểu sau, phát biểu nào mô tả đúng nhất về việc phân tích môi trường trong quản trị chiến lược?", o: ["Nhà quản trị chỉ cần phân tích môi trường nội bộ để đưa ra chiến lược cho công ty.", "Phân tích môi trường bên ngoài chủ yếu để biết được điểm mạnh, điểm yếu của tổ chức.", "Phân tích môi trường bên ngoài giúp doanh nghiệp xác định được cơ hội và thách thức đối với hoạt động kinh doanh của mình.", "Không có phát biểu nào đúng."], a: "Phân tích môi trường bên ngoài giúp doanh nghiệp xác định được cơ hội và thách thức đối với hoạt động kinh doanh của mình." },
+                    { q: "Bước thứ tư trong việc xây dựng ma trận SWOT thường là gì?", o: ["Liệt kê các cơ hội và thách thức từ môi trường bên ngoài.", "Liệt kê các điểm mạnh bên trong công ty.", "Liệt kê các điểm yếu bên trong công ty", "Hình thành các chiến lược SO, ST, WO, WT."], a: "Hình thành các chiến lược SO, ST, WO, WT." },
+                    { q: "Tầm nhìn chiến lược (vision) của một doanh nghiệp là gì?", o: ["Những định hướng lâu dài và bức tranh tương lai mà doanh nghiệp hướng tới, dựa trên dự báo về sự biến động của môi trường kinh doanh.", "Những định hướng hoạt động cụ thể trong một khoảng thời gian nhất định (ví dụ 1 năm).", "Những định hướng phát triển sản phẩm và thị trường trong 3 đến 5 năm.", "Những định hướng tài chính và nhân sự trong 1 đến 3 năm."], a: "Những định hướng lâu dài và bức tranh tương lai mà doanh nghiệp hướng tới, dựa trên dự báo về sự biến động của môi trường kinh doanh." },
+                    { q: "Sứ mệnh (mission) của doanh nghiệp được hiểu là gì?", o: ["Tuyên bố về mục đích tồn tại, những công việc cốt lõi, những mong muốn và phương pháp mà các thành viên trong doanh nghiệp cần thực hiện với nỗ lực tối đa nhằm đạt được lợi ích cho các bên liên quan.", "Tập hợp những định hướng phát triển sản phẩm mới trong tương lai.", "Những định hướng chiến lược cạnh tranh trong khoảng thời gian 3 đến 5 năm.", "Những định hướng phân bổ nguồn lực trong 1 đến 3 năm tới."], a: "Tuyên bố về mục đích tồn tại, những công việc cốt lõi, những mong muốn và phương pháp mà các thành viên trong doanh nghiệp cần thực hiện với nỗ lực tối đa nhằm đạt được lợi ích cho các bên liên quan." },
+                    { q: "Hoạt động quản trị trở nên cần thiết trong một tổ chức chủ yếu vì lý do nào?", o: ["Để thể hiện vai trò và quyền lực của người điều hành cấp cao.", "Để chứng minh rằng người điều hành cấp thấp có năng lực kém hơn.", "Để phối hợp các nỗ lực cá nhân, tối ưu hóa việc sử dụng nguồn lực và mang lại hiệu quả cao hơn cho việc đạt được mục tiêu chung.", "Để cho thấy sự phân chia cấp bậc rõ ràng và duy trì trật tự trong tổ chức."], a: "Để phối hợp các nỗ lực cá nhân, tối ưu hóa việc sử dụng nguồn lực và mang lại hiệu quả cao hơn cho việc đạt được mục tiêu chung." },
+                    { q: "Đặc điểm nào sau đây KHÔNG phải là đặc điểm của phong cách lãnh đạo dân chủ?", o: ["Khuyến khích sự tham gia của cấp dưới vào quá trình ra quyết định.", "Cấp dưới được trao quyền và khuyến khích đưa ra một số quyết định trong phạm vi của mình.", "Giao nhiệm vụ theo kiểu mệnh lệnh và yêu cầu tuân thủ tuyệt đối.", "Lắng nghe ý kiến và phản hồi từ cấp dưới."], a: "Giao nhiệm vụ theo kiểu mệnh lệnh và yêu cầu tuân thủ tuyệt đối." },
+                    { q: "Phương pháp ra quyết định Maximax (trong lý thuyết quyết định) là phương pháp lựa chọn dựa trên tiêu chí nào?", o: ["Lựa chọn phương án mang lại kết quả tốt nhất trong kịch bản xấu nhất.", "Lựa chọn phương án mang lại kết quả tốt nhất trong kịch bản trung bình.", "Lựa chọn phương án mang lại kết quả tốt nhất trong kịch bản tốt nhất (lạc quan).", "Lựa chọn phương án mang lại kết quả xấu nhất trong kịch bản tốt nhất."], a: "Lựa chọn phương án mang lại kết quả tốt nhất trong kịch bản tốt nhất (lạc quan)." },
+                    { q: "Phương pháp ra quyết định Maximin (trong lý thuyết quyết định) là phương pháp lựa chọn dựa trên tiêu chí nào?", o: ["Lựa chọn phương án mang lại kết quả tốt nhất trong kịch bản xấu nhất (thận trọng).", "Lựa chọn phương án mang lại kết quả tốt nhất trong kịch bản tốt.", "Lựa chọn phương án mang lại kết quả tốt nhất ở trạng thái tốt nhất.", "Lựa chọn phương án mang lại kết quả xấu nhất ở trạng thái tốt nhất."], a: "Lựa chọn phương án mang lại kết quả tốt nhất trong kịch bản xấu nhất (thận trọng)." },
+                    { q: "Chỉ số hiệu suất sử dụng vốn của doanh nghiệp (ví dụ ROA, ROE) thể hiện điều gì?", o: ["Sử dụng 1 đồng vốn để tạo ra 1 đồng lợi nhuận.", "Khả năng sinh lời từ số vốn đã đầu tư", "Sử dụng 1 đồng doanh thu để tạo ra 1 đồng vốn.", "Sử dụng 1 đồng chi phí để tạo ra 1 đồng vốn."], a: "Khả năng sinh lời từ số vốn đã đầu tư" },
+                    { q: "Đâu KHÔNG phải là một trong năm áp lực cạnh tranh theo mô hình của Michael E. Porter?", o: ["Nguy cơ từ các đối thủ tiềm ẩn mới.", "Quyền thương lượng của nhà cung cấp.", "Tác động của các chính sách kinh tế vĩ mô.", "Mối đe dọa từ các sản phẩm/dịch vụ thay thế."], a: "Tác động của các chính sách kinh tế vĩ mô." },
+                    { q: "Quá trình nào sau đây thể hiện trình tự hợp lý nhất trong việc thực hiện quản trị chiến lược?", o: ["Tổ chức → Điều khiển → Hoạch định → Kiểm tra", "Hoạch định → Tổ chức → Điều khiển → Kiểm tra", "Tổ chức → Hoạch định → Điều khiển → Kiểm tra", "Điều khiển → Tổ chức → Kiểm tra → Hoạch định"], a: "Hoạch định → Tổ chức → Điều khiển → Kiểm tra" },
+                    { q: "Khi một nhà quản trị dự án được đánh giá là người 'biết ủy nhiệm ủy quyền', điều đó thể hiện rõ nhất năng lực nào của họ?", o: ["Năng lực giao tiếp hiệu quả.", "Năng lực tạo dựng và phát triển nhóm.", "Năng lực tổ chức công việc khoa học.", "Năng lực lãnh đạo, tin tưởng và trao quyền cho cấp dưới."], a: "Năng lực lãnh đạo, tin tưởng và trao quyền cho cấp dưới." },
+                    { q: "Đâu là cách thức tổ chức thực hiện dự án mà chủ đầu tư giữ vai trò trực tiếp quản lý và điều hành các hoạt động của dự án?", o: ["Chủ đầu tư trực tiếp quản lý (In-house)", "Chủ nhiệm điều hành dự án (Project Management) - thuê ngoài", "Chìa khóa trao tay (Turnkey)", "Tất cả các phương án trên đều đúng tùy trường hợp."], a: "Chủ đầu tư trực tiếp quản lý (In-house)" },
+                    { q: "Nguyên nhân chính gây ra rủi ro trong giai đoạn phân tích và lập dự án kinh doanh thường là gì?", o: ["Phát hiện các vấn đề muộn do thiếu thông tin cập nhật.", "Phân tích môi trường dự án (thị trường, đối thủ, pháp lý...) thiếu chính xác, không đầy đủ.", "Dự án không đảm bảo tính khả thi về mặt kỹ thuật hoặc tài chính.", "Tất cả các phương án trên đều đúng."], a: "Tất cả các phương án trên đều đúng." },
+                    { q: "Chức năng nào của quản trị có tác dụng chỉ đạo, định hướng cho các chức năng còn lại trong tổ chức?", o: ["Chức năng lập kế hoạch (Hoạch định)", "Chức năng lãnh đạo", "Chức năng kiểm tra", "Chức năng tổ chức"], a: "Chức năng lập kế hoạch (Hoạch định)" },
+                    { q: "Khi hoạch định, nhà quản trị cần làm gì để ứng phó với sự thay đổi của môi trường?", o: ["Làm giảm tính linh hoạt của tổ chức để tập trung vào mục tiêu.", "Tránh lãng phí thời gian vào việc dự báo những thay đổi không chắc chắn.", "Phối hợp nỗ lực của toàn tổ chức, xây dựng các kịch bản và kế hoạch dự phòng.", "Giữ nguyên kế hoạch ban đầu để đảm bảo tính nhất quán."], a: "Phối hợp nỗ lực của toàn tổ chức, xây dựng các kịch bản và kế hoạch dự phòng." },
+                    { q: "Hoạch định giúp nhà quản trị những lợi ích chính nào, NGOẠI TRỪ?", o: ["Có tư duy hệ thống và định hướng tốt hơn về các tình huống quản trị.", "Phối hợp và sử dụng các nguồn lực của tổ chức một cách hữu hiệu hơn.", "Tập trung vào các mục tiêu và chính sách quan trọng của doanh nghiệp.", "Sẵn sàng né tránh những thay đổi đột ngột của môi trường bên ngoài."], a: "Sẵn sàng né tránh những thay đổi đột ngột của môi trường bên ngoài." }
+                ]
+            },
+            {
+                section: "PHẦN 2: QUẢN TRỊ BÁN HÀNG",
+                questions: [
+                    { q: "Mục tiêu chính của hoạt động quản trị bán hàng là gì?", o: ["Tối đa hóa số lượng sản phẩm bán ra.", "Giảm thiểu chi phí bán hàng.", "Đạt được mục tiêu doanh số và lợi nhuận, đồng thời xây dựng mối quan hệ bền vững với khách hàng.", "Tuyển dụng và đào tạo đội ngũ nhân viên bán hàng xuất sắc."], a: "Đạt được mục tiêu doanh số và lợi nhuận, đồng thời xây dựng mối quan hệ bền vững với khách hàng." },
+                    { q: "Kênh phân phối trực tiếp trong bán hàng có đặc điểm gì?", o: ["Sản phẩm đi qua nhiều trung gian trước khi đến tay người tiêu dùng.", "Nhà sản xuất bán hàng thẳng cho người tiêu dùng cuối cùng, không qua trung gian.", "Sử dụng đại lý và nhà bán lẻ để đưa sản phẩm ra thị trường.", "Chi phí phân phối luôn thấp hơn kênh gián tiếp."], a: "Nhà sản xuất bán hàng thẳng cho người tiêu dùng cuối cùng, không qua trung gian." },
+                    { q: "Kỹ năng nào sau đây là quan trọng nhất đối với một nhân viên bán hàng thành công?", o: ["Kỹ năng thuyết trình sản phẩm.", "Kỹ năng đàm phán và chốt sale.", "Kỹ năng lắng nghe và thấu hiểu nhu cầu khách hàng.", "Tất cả các kỹ năng trên đều quan trọng và cần thiết."], a: "Tất cả các kỹ năng trên đều quan trọng và cần thiết." },
+                    { q: "'Phễu bán hàng' (Sales Funnel) mô tả điều gì?", o: ["Quy trình sản xuất sản phẩm từ nguyên liệu đến thành phẩm.", "Hành trình của khách hàng tiềm năng từ lúc nhận biết sản phẩm đến khi quyết định mua hàng.", "Cơ cấu tổ chức của bộ phận bán hàng trong doanh nghiệp.", "Các chương trình khuyến mãi và giảm giá sản phẩm."], a: "Hành trình của khách hàng tiềm năng từ lúc nhận biết sản phẩm đến khi quyết định mua hàng." },
+                    { q: "Chỉ số KPI 'Tỷ lệ chuyển đổi' (Conversion Rate) trong bán hàng đo lường điều gì?", o: ["Số lượng khách hàng mới mà một nhân viên bán hàng có được.", "Tỷ lệ phần trăm khách hàng tiềm năng thực hiện một hành động mong muốn (ví dụ: mua hàng, đăng ký...).", "Doanh thu trung bình trên mỗi khách hàng.", "Thời gian trung bình để chốt một thương vụ."], a: "Tỷ lệ phần trăm khách hàng tiềm năng thực hiện một hành động mong muốn (ví dụ: mua hàng, đăng ký...)." },
+                    { q: "Trong quy trình bán hàng cá nhân, bước nào thường diễn ra sau bước 'Trình bày giải pháp/sản phẩm'?", o: ["Tìm kiếm khách hàng tiềm năng.", "Tiếp cận và tạo ấn tượng ban đầu.", "Xử lý từ chối và giải đáp thắc mắc.", "Chăm sóc sau bán hàng."], a: "Xử lý từ chối và giải đáp thắc mắc." },
+                    { q: "Phương pháp bán hàng nào tập trung vào việc xây dựng mối quan hệ lâu dài và tin cậy với khách hàng, thay vì chỉ tập trung vào việc bán được hàng một lần?", o: ["Bán hàng giao dịch (Transactional Selling).", "Bán hàng tư vấn/quan hệ (Consultative/Relational Selling).", "Bán hàng giải pháp (Solution Selling).", "Bán hàng thách thức (Challenger Sale)."], a: "Bán hàng tư vấn/quan hệ (Consultative/Relational Selling)." },
+                    { q: "Đâu là một lợi ích của việc sử dụng hệ thống CRM (Customer Relationship Management) trong quản trị bán hàng?", o: ["Tăng chi phí quản lý dữ liệu khách hàng.", "Làm phức tạp thêm quy trình làm việc của nhân viên bán hàng.", "Cải thiện khả năng theo dõi, quản lý thông tin khách hàng và tối ưu hóa tương tác với khách hàng.", "Giảm sự linh hoạt trong việc tiếp cận khách hàng."], a: "Cải thiện khả năng theo dõi, quản lý thông tin khách hàng và tối ưu hóa tương tác với khách hàng." },
+                    { q: "Trong việc xây dựng chính sách hoa hồng cho nhân viên bán hàng, yếu tố nào cần được cân nhắc để đảm bảo tính công bằng và động viên?", o: ["Chỉ dựa trên doanh số bán hàng cá nhân.", "Đặt ra các mục tiêu quá cao để thử thách nhân viên.", "Kết hợp các chỉ tiêu định lượng (doanh số, số lượng khách hàng mới) và định tính (sự hài lòng của khách hàng, tinh thần đồng đội).", "Giữ bí mật về cách tính hoa hồng để tạo sự bất ngờ."], a: "Kết hợp các chỉ tiêu định lượng (doanh số, số lượng khách hàng mới) và định tính (sự hài lòng của khách hàng, tinh thần đồng đội)." },
+                    { q: "'Up-selling' trong bán hàng có nghĩa là gì?", o: ["Bán thêm các sản phẩm phụ trợ cho sản phẩm chính.", "Thuyết phục khách hàng mua một phiên bản sản phẩm đắt tiền hơn, cao cấp hơn hoặc nhiều tính năng hơn sản phẩm họ định mua ban đầu.", "Bán sản phẩm cho một đối tượng khách hàng hoàn toàn mới.", "Giảm giá sản phẩm để khuyến khích khách hàng mua nhiều hơn."], a: "Thuyết phục khách hàng mua một phiên bản sản phẩm đắt tiền hơn, cao cấp hơn hoặc nhiều tính năng hơn sản phẩm họ định mua ban đầu." },
+                    { q: "Tình huống: Một khách hàng phàn nàn rằng sản phẩm Anh/Chị bán không đạt chất lượng như quảng cáo. Là một nhân viên bán hàng, bước đầu tiên Anh/Chị nên làm là gì?", o: ["Tranh luận với khách hàng để bảo vệ uy tín sản phẩm.", "Đổ lỗi cho bộ phận sản xuất hoặc nhà cung cấp.", "Lắng nghe cẩn thận và bày tỏ sự đồng cảm với vấn đề của khách hàng, sau đó thu thập thông tin chi tiết.", "Đề nghị ngay lập tức hoàn tiền cho khách hàng để tránh rắc rối."], a: "Lắng nghe cẩn thận và bày tỏ sự đồng cảm với vấn đề của khách hàng, sau đó thu thập thông tin chi tiết." },
+                    { q: "Để chuẩn bị cho một cuộc gặp bán hàng quan trọng với khách hàng doanh nghiệp (B2B), Anh/Chị cần tìm hiểu những thông tin nào về khách hàng đó?", o: ["Chỉ cần biết tên và chức danh của người Anh/Chị sẽ gặp.", "Tập trung vào các thông tin cá nhân, sở thích của người đại diện.", "Tìm hiểu về ngành nghề kinh doanh, quy mô, các vấn đề và mục tiêu.", "Chuẩn bị sẵn một bài thuyết trình chung về tất cả các sản phẩm của công ty Anh/Chị."], a: "Tìm hiểu về ngành nghề kinh doanh, quy mô, các vấn đề và mục tiêu." },
+                    { q: "Khi khách hàng đưa ra một lời từ chối mua hàng (ví dụ: 'Giá sản phẩm của Anh/Chị cao quá'), một nhân viên bán hàng chuyên nghiệp nên phản ứng như thế nào?", o: ["Ngay lập tức giảm giá sản phẩm.", "Kết thúc cuộc nói chuyện vì cho rằng khách hàng không có thiện chí.", "Ghi nhận lời từ chối, đặt câu hỏi để tìm hiểu rõ hơn lý do.", "Phớt lờ lời từ chối và tiếp tục nói về các tính năng khác của sản phẩm."], a: "Ghi nhận lời từ chối, đặt câu hỏi để tìm hiểu rõ hơn lý do." },
+                    { q: "Anh/Chị được giao nhiệm vụ xây dựng kế hoạch bán hàng cho một sản phẩm mới ra mắt. Yếu tố nào sau đây Anh/Chị cần xác định ĐẦU TIÊN?", o: ["Ngân sách cho hoạt động quảng cáo.", "Đối tượng khách hàng mục tiêu và chân dung khách hàng lý tưởng.", "Các kênh phân phối sản phẩm.", "Mục tiêu doanh số cụ thể cho tháng đầu tiên."], a: "Đối tượng khách hàng mục tiêu và chân dung khách hàng lý tưởng." },
+                    { q: "Để duy trì mối quan hệ tốt đẹp với khách hàng sau khi bán hàng thành công, Anh/Chị nên thực hiện hành động nào sau đây?", o: ["Không liên lạc lại với khách hàng để tránh làm phiền.", "Chỉ liên hệ khi có sản phẩm mới cần giới thiệu.", "Định kỳ hỏi thăm về trải nghiệm sử dụng sản phẩm, hỗ trợ giải đáp.", "Yêu cầu khách hàng giới thiệu thêm khách hàng mới ngay sau khi họ mua hàng."], a: "Định kỳ hỏi thăm về trải nghiệm sử dụng sản phẩm, hỗ trợ giải đáp." },
+                    { q: "Trong một buổi giới thiệu sản phẩm trực tiếp (demo), điều quan trọng nhất Anh/Chị cần tập trung là gì?", o: ["Trình bày tất cả các tính năng kỹ thuật phức tạp của sản phẩm.", "Sản phẩm giải quyết vấn đề hoặc đáp ứng nhu cầu cụ thể của khách hàng như thế nào.", "So sánh sản phẩm của Anh/Chị vượt trội hơn tất cả các đối thủ cạnh tranh.", "Đảm bảo buổi demo diễn ra thật nhanh để tiết kiệm thời gian cho khách hàng."], a: "Sản phẩm giải quyết vấn đề hoặc đáp ứng nhu cầu cụ thể của khách hàng như thế nào." },
+                    { q: "Kỹ thuật 'đặt câu hỏi mở' trong bán hàng (ví dụ: 'Anh/chị có thể chia sẻ thêm về những khó khăn hiện tại trong công việc...?') có tác dụng chính là gì?", o: ["Giúp nhân viên bán hàng nói nhiều hơn về sản phẩm.", "Khuyến khích khách hàng chia sẻ thông tin, nhu cầu và mối quan tâm của họ một cách chi tiết.", "Dẫn dắt khách hàng đến quyết định mua hàng nhanh chóng.", "Kiểm tra kiến thức của khách hàng về sản phẩm."], a: "Khuyến khích khách hàng chia sẻ thông tin, nhu cầu và mối quan tâm của họ một cách chi tiết." },
+                    { q: "Anh/Chị đang cố gắng chốt một đơn hàng lớn nhưng khách hàng tỏ ra do dự. Kỹ thuật 'tạo sự khan hiếm' hoặc 'ưu đãi có giới hạn thời gian' nên được sử dụng như thế nào cho hiệu quả và không gây phản cảm?", o: ["Tạo ra thông tin sai lệch về việc sản phẩm sắp hết hàng.", "Đưa ra một lý do hợp lý cho ưu đãi và nhấn mạnh lợi ích khách hàng.", "Liên tục gọi điện thúc giục khách hàng.", "Đe dọa rằng giá sẽ tăng mạnh nếu không mua ngay."], a: "Đưa ra một lý do hợp lý cho ưu đãi và nhấn mạnh lợi ích khách hàng." },
+                    { q: "Để đánh giá hiệu quả của một chiến dịch bán hàng qua điện thoại (telesales), chỉ số nào sau đây là quan trọng nhất cần theo dõi?", o: ["Tổng số cuộc gọi đã thực hiện.", "Thời gian trung bình của mỗi cuộc gọi.", "Tỷ lệ cuộc gọi thành công trên tổng số cuộc gọi đã kết nối.", "Số lượng kịch bản bán hàng đã sử dụng."], a: "Tỷ lệ cuộc gọi thành công trên tổng số cuộc gọi đã kết nối." },
+                    { q: "Khi xây dựng mục tiêu bán hàng theo phương pháp SMART, chữ 'M' (Measurable) có nghĩa là mục tiêu đó phải như thế nào?", o: ["Phải đủ thách thức để tạo động lực.", "Phải liên quan trực tiếp đến mục tiêu chung của công ty.", "Phải có thể đo lường được bằng các con số hoặc chỉ số cụ thể.", "Phải có thời hạn hoàn thành rõ ràng."], a: "Phải có thể đo lường được bằng các con số hoặc chỉ số cụ thể." }
+                ]
+            },
+            {
+                section: "PHẦN 3: QUẢN TRỊ NHÓM LÀM VIỆC",
+                questions: [
+                    { q: "Một nhóm làm việc hiệu quả thường có đặc điểm nào sau đây?", o: ["Các thành viên luôn đồng ý với nhau về mọi vấn đề.", "Có một nhà lãnh đạo độc đoán, ra quyết định nhanh chóng.", "Có mục tiêu chung rõ ràng, các thành viên tin tưởng và hỗ trợ lẫn nhau, giao tiếp cởi mở.", "Kích thước nhóm càng lớn càng tốt để có nhiều ý tưởng."], a: "Có mục tiêu chung rõ ràng, các thành viên tin tưởng và hỗ trợ lẫn nhau, giao tiếp cởi mở." },
+                    { q: "Giai đoạn nào trong quá trình phát triển nhóm thường xảy ra nhiều xung đột và bất đồng ý kiến nhất?", o: ["Hình thành (Forming).", "Bão tố (Storming).", "Chuẩn hóa (Norming).", "Thực thi (Performing)."], a: "Bão tố (Storming)." },
+                    { q: "Vai trò của người lãnh đạo nhóm trong giai đoạn 'Chuẩn hóa' (Norming) là gì?", o: ["Thiết lập các quy tắc và mục tiêu ban đầu cho nhóm.", "Giải quyết các xung đột và giúp các thành viên hiểu nhau hơn.", "Khuyến khích sự hợp tác, củng cố các quy tắc làm việc chung và xây dựng sự gắn kết.", "Trao quyền và hỗ trợ nhóm tự quản lý công việc."], a: "Khuyến khích sự hợp tác, củng cố các quy tắc làm việc chung và xây dựng sự gắn kết." },
+                    { q: "'Brainstorming' (Động não) là một kỹ thuật thường được sử dụng trong nhóm làm việc nhằm mục đích gì?", o: ["Đánh giá hiệu suất làm việc của các thành viên.", "Tạo ra nhiều ý tưởng mới và đa dạng về một vấn đề hoặc giải pháp.", "Phân công công việc cụ thể cho từng thành viên.", "Giải quyết các mâu thuẫn cá nhân trong nhóm."], a: "Tạo ra nhiều ý tưởng mới và đa dạng về một vấn đề hoặc giải pháp." },
+                    { q: "Để giải quyết xung đột trong nhóm một cách xây dựng, người quản lý nhóm nên làm gì?", o: ["Phớt lờ xung đột với hy vọng nó sẽ tự biến mất.", "Áp đặt ý kiến của mình để nhanh chóng chấm dứt tranh cãi.", "Tạo điều kiện cho các bên liên quan bày tỏ quan điểm, tìm hiểu nguyên nhân gốc rễ và cùng nhau tìm giải pháp thỏa đáng.", "Tìm ra người có lỗi và kỷ luật nghiêm khắc."], a: "Tạo điều kiện cho các bên liên quan bày tỏ quan điểm, tìm hiểu nguyên nhân gốc rễ và cùng nhau tìm giải pháp thỏa đáng." },
+                    { q: "Yếu tố nào sau đây KHÔNG phải là một rào cản phổ biến trong giao tiếp nhóm?", o: ["Thông điệp không rõ ràng, mơ hồ.", "Sự khác biệt về văn hóa và nhận thức.", "Thiếu lắng nghe chủ động.", "Việc sử dụng quá nhiều kênh giao tiếp khác nhau (email, họp trực tiếp, tin nhắn)."], a: "Việc sử dụng quá nhiều kênh giao tiếp khác nhau (email, họp trực tiếp, tin nhắn)." },
+                    { q: "Việc thiết lập các 'quy tắc nền tảng' (ground rules) cho nhóm làm việc có lợi ích gì?", o: ["Hạn chế sự sáng tạo và linh hoạt của các thành viên.", "Tạo ra một khuôn khổ ứng xử chung, giúp các cuộc họp và thảo luận diễn ra hiệu quả hơn, giảm thiểu hiểu lầm.", "Gây thêm áp lực và căng thẳng cho các thành viên.", "Chỉ cần thiết cho các nhóm mới thành lập."], a: "Tạo ra một khuôn khổ ứng xử chung, giúp các cuộc họp và thảo luận diễn ra hiệu quả hơn, giảm thiểu hiểu lầm." },
+                    { q: "'Groupthink' là một hiện tượng tiêu cực có thể xảy ra trong nhóm làm việc, đặc trưng bởi điều gì?", o: ["Các thành viên tranh luận gay gắt để tìm ra giải pháp tốt nhất.", "Xu hướng các thành viên trong nhóm đồng thuận một cách quá mức để tránh xung đột, dẫn đến việc bỏ qua các ý kiến phản biện và đưa ra quyết định sai lầm.", "Nhóm làm việc quá hiệu quả và hoàn thành mục tiêu sớm hơn dự kiến.", "Sự thiếu gắn kết và hợp tác giữa các thành viên."], a: "Xu hướng các thành viên trong nhóm đồng thuận một cách quá mức để tránh xung đột, dẫn đến việc bỏ qua các ý kiến phản biện và đưa ra quyết định sai lầm." },
+                    { q: "Để xây dựng lòng tin trong nhóm làm việc, các thành viên cần làm gì?", o: ["Luôn che giấu điểm yếu của mình.", "Chỉ tập trung vào công việc cá nhân, không quan tâm đến người khác.", "Trung thực, cởi mở, giữ lời hứa, tôn trọng và hỗ trợ lẫn nhau.", "Tránh đưa ra những ý kiến khác biệt với số đông."], a: "Trung thực, cởi mở, giữ lời hứa, tôn trọng và hỗ trợ lẫn nhau." },
+                    { q: "Đo lường và đánh giá hiệu quả làm việc của nhóm nên dựa trên yếu tố nào?", o: ["Chỉ dựa trên kết quả đầu ra cuối cùng của nhóm.", "Chỉ dựa trên mức độ hài lòng của các thành viên trong nhóm.", "Kết hợp cả kết quả đạt được so với mục tiêu, hiệu quả của quá trình làm việc và sự phát triển của các thành viên.", "So sánh với thành tích của các nhóm khác."], a: "Kết hợp cả kết quả đạt được so với mục tiêu, hiệu quả của quá trình làm việc và sự phát triển của các thành viên." },
+                    { q: "Tình huống: Nhóm của Anh/Chị được giao một dự án với thời hạn gấp. Là trưởng nhóm, Anh/Chị sẽ phân công công việc như thế nào để đảm bảo hiệu quả và công bằng?", o: ["Tự mình ôm đồm hết các việc quan trọng để đảm bảo chất lượng.", "Phân chia đều công việc cho tất cả các thành viên bất kể năng lực.", "Đánh giá điểm mạnh, điểm yếu và khối lượng công việc hiện tại, sau đó phân công.", "Để các thành viên tự chọn việc mình thích làm."], a: "Đánh giá điểm mạnh, điểm yếu và khối lượng công việc hiện tại, sau đó phân công." },
+                    { q: "Trong một cuộc họp nhóm, một thành viên liên tục ngắt lời người khác và chỉ nói về ý kiến của mình. Với vai trò điều phối cuộc họp, Anh/Chị nên xử lý tình huống này như thế nào?", o: ["Phớt lờ hành vi đó để tránh làm mất lòng thành viên.", "Ngắt lời lại thành viên đó một cách gay gắt.", "Lịch sự nhắc nhở về quy tắc lắng nghe, đề nghị thành viên đó chờ.", "Kết thúc cuộc họp sớm vì không khí căng thẳng."], a: "Lịch sự nhắc nhở về quy tắc lắng nghe, đề nghị thành viên đó chờ." },
+                    { q: "Để khuyến khích sự sáng tạo và đóng góp ý tưởng từ tất cả các thành viên trong nhóm, Anh/Chị có thể áp dụng phương pháp nào sau đây?", o: ["Chỉ lắng nghe ý kiến từ những thành viên có kinh nghiệm nhất.", "Phê bình ngay những ý tưởng có vẻ không khả thi.", "Tạo không khí cởi mở, khuyến khích mọi người chia sẻ ý tưởng.", "Đưa ra sẵn một vài ý tưởng và yêu cầu nhóm chọn lựa."], a: "Tạo không khí cởi mở, khuyến khích mọi người chia sẻ ý tưởng." },
+                    { q: "Khi một thành viên trong nhóm không hoàn thành nhiệm vụ đúng hạn, ảnh hưởng đến tiến độ chung, trưởng nhóm nên làm gì đầu tiên?", o: ["Công khai chỉ trích thành viên đó trước cả nhóm.", "Âm thầm làm thay phần việc của thành viên đó.", "Trao đổi riêng với thành viên đó để tìm hiểu nguyên nhân.", "Báo cáo ngay lên cấp trên về sự thiếu trách nhiệm của thành viên."], a: "Trao đổi riêng với thành viên đó để tìm hiểu nguyên nhân." },
+                    { q: "Làm thế nào để xây dựng tinh thần đồng đội và sự gắn kết giữa các thành viên trong một nhóm mới thành lập?", o: ["Giao cho mỗi người một nhiệm vụ riêng biệt và yêu cầu họ tự hoàn thành.", "Tổ chức các buổi họp thường xuyên chỉ để báo cáo tiến độ công việc.", "Tổ chức các hoạt động làm quen (ice-breaking), các buổi làm việc nhóm nhỏ để giải quyết các vấn đề chung.", "Đặt ra những quy định làm việc thật nghiêm khắc ngay từ đầu."], a: "Tổ chức các hoạt động làm quen (ice-breaking), các buổi làm việc nhóm nhỏ để giải quyết các vấn đề chung." },
+                    { q: "Trong một dự án nhóm, việc xác định rõ vai trò và trách nhiệm (roles and responsibilities) của từng thành viên có lợi ích gì?", o: ["Tạo ra sự cạnh tranh không cần thiết giữa các thành viên.", "Giúp mọi người hiểu rõ nhiệm vụ của mình và của người khác.", "Hạn chế sự linh hoạt và khả năng hỗ trợ lẫn nhau.", "Làm cho cơ cấu nhóm trở nên quá cứng nhắc."], a: "Giúp mọi người hiểu rõ nhiệm vụ của mình và của người khác." },
+                    { q: "Khi nhóm của Anh/Chị đạt được một thành tựu quan trọng, việc ăn mừng và công nhận đóng góp của các thành viên có tác dụng gì?", o: ["Làm cho các thành viên trở nên tự mãn và lơ là.", "Tăng cường động lực, sự gắn kết, tạo cảm giác được trân trọng.", "Gây tốn kém chi phí không cần thiết cho công ty.", "Không có tác dụng gì đáng kể."], a: "Tăng cường động lực, sự gắn kết, tạo cảm giác được trân trọng." },
+                    { q: "Nếu Anh/Chị là thành viên trong một nhóm và nhận thấy một quy trình làm việc hiện tại không hiệu quả, Anh/Chị nên làm gì?", o: ["Im lặng và tiếp tục làm theo quy trình cũ để tránh gây xáo trộn.", "Tự ý thay đổi quy trình làm việc của riêng mình.", "Suy nghĩ kỹ về giải pháp cải tiến, sau đó chủ động đề xuất và thảo luận.", "Phàn nàn về quy trình làm việc với các đồng nghiệp khác ngoài nhóm."], a: "Suy nghĩ kỹ về giải pháp cải tiến, sau đó chủ động đề xuất và thảo luận." },
+                    { q: "Làm thế nào để một nhóm có thể học hỏi từ những sai lầm hoặc thất bại trong một dự án?", o: ["Cố gắng che giấu sai lầm để không bị cấp trên khiển trách.", "Tìm ra một người cụ thể để đổ lỗi cho thất bại đó.", "Tổ chức một buổi họp rút kinh nghiệm (lessons learned), phân tích một cách khách quan.", "Nhanh chóng quên đi thất bại và bắt đầu một dự án mới."], a: "Tổ chức một buổi họp rút kinh nghiệm (lessons learned), phân tích một cách khách quan." },
+                    { q: "Một thành viên mới gia nhập nhóm thường gặp khó khăn trong việc hòa nhập. Là một thành viên cũ, Anh/Chị có thể làm gì để hỗ trợ họ?", o: ["Mặc kệ để họ tự tìm cách thích nghi.", "Chỉ giao cho họ những công việc đơn giản nhất.", "Chủ động chào hỏi, giới thiệu họ với các thành viên khác, chia sẻ thông tin.", "So sánh họ với các thành viên cũ đã quen việc."], a: "Chủ động chào hỏi, giới thiệu họ với các thành viên khác, chia sẻ thông tin." }
+                ]
+            },
+            {
+                section: "PHẦN 4: KHỞI NGHIỆP",
+                questions: [
+                    { q: "Định nghĩa nào sau đây mô tả đúng nhất về 'khởi nghiệp' (startup)?", o: ["Bất kỳ doanh nghiệp nào mới được thành lập.", "Một tổ chức được thiết kế để tìm kiếm một mô hình kinh doanh có khả năng lặp lại và mở rộng quy mô, thường gắn liền với sự đổi mới và công nghệ.", "Một doanh nghiệp nhỏ hoạt động trong lĩnh vực truyền thống.", "Một dự án kinh doanh có thời gian hoạt động dưới 1 năm."], a: "Một tổ chức được thiết kế để tìm kiếm một mô hình kinh doanh có khả năng lặp lại và mở rộng quy mô, thường gắn liền với sự đổi mới và công nghệ." },
+                    { q: "'MVP' (Minimum Viable Product - Sản phẩm khả thi tối thiểu) trong khởi nghiệp có nghĩa là gì?", o: ["Một sản phẩm hoàn chỉnh với đầy đủ tất cả các tính năng dự kiến.", "Một phiên bản sản phẩm với số lượng tính năng cốt lõi đủ để thu hút những người dùng đầu tiên và thu thập phản hồi để phát triển tiếp.", "Một ý tưởng kinh doanh chưa được triển khai thành sản phẩm.", "Một kế hoạch kinh doanh chi tiết."], a: "Một phiên bản sản phẩm với số lượng tính năng cốt lõi đủ để thu hút những người dùng đầu tiên và thu thập phản hồi để phát triển tiếp." },
+                    { q: "'Vòng đời của một startup' thường bao gồm các giai đoạn nào?", o: ["Ý tưởng → Lợi nhuận → Bão hòa → Suy thoái.", "Ý tưởng/Hạt giống → Tăng trưởng ban đầu → Mở rộng quy mô → Trưởng thành/Thoái vốn.", "Nghiên cứu thị trường → Phát triển sản phẩm → Marketing → Bán hàng.", "Thành lập → Hoạt động → Phát triển → Ổn định."], a: "Ý tưởng/Hạt giống → Tăng trưởng ban đầu → Mở rộng quy mô → Trưởng thành/Thoái vốn." },
+                    { q: "Nguồn vốn nào KHÔNG phải là nguồn vốn phổ biến cho các startup ở giai đoạn đầu (giai đoạn hạt giống)?", o: ["Vốn tự có của nhà sáng lập (Bootstrapping).", "Vốn từ Anh/Chị bè, gia đình (Friends and Family).", "Vốn từ các nhà đầu tư thiên thần (Angel Investors).", "Vốn từ việc phát hành cổ phiếu lần đầu ra công chúng (IPO)."], a: "Vốn từ việc phát hành cổ phiếu lần đầu ra công chúng (IPO)." },
+                    { q: "'Business Model Canvas' (Mô hình kinh doanh Canvas) là một công cụ giúp các nhà khởi nghiệp làm gì?", o: ["Viết một kế hoạch kinh doanh dài hàng trăm trang.", "Trực quan hóa, mô tả, đánh giá và thay đổi mô hình kinh doanh một cách nhanh chóng và linh hoạt thông qua 9 yếu tố cốt lõi.", "Dự báo doanh thu và lợi nhuận chi tiết cho 5 năm tới.", "Phân tích đối thủ cạnh tranh trên thị trường."], a: "Trực quan hóa, mô tả, đánh giá và thay đổi mô hình kinh doanh một cách nhanh chóng và linh hoạt thông qua 9 yếu tố cốt lõi." },
+                    { q: "Yếu tố nào sau đây được coi là quan trọng nhất đối với sự thành công của một startup?", o: ["Một ý tưởng độc đáo chưa từng có.", "Nguồn vốn dồi dào.", "Một đội ngũ sáng lập mạnh, có đam mê, kỹ năng bổ trợ cho nhau và khả năng thực thi tốt.", "Một sản phẩm hoàn hảo ngay từ đầu."], a: "Một đội ngũ sáng lập mạnh, có đam mê, kỹ năng bổ trợ cho nhau và khả năng thực thi tốt." },
+                    { q: "'Pivot' trong thuật ngữ khởi nghiệp có nghĩa là gì?", o: ["Mở rộng quy mô hoạt động của startup sang thị trường mới.", "Huy động thành công một vòng vốn đầu tư lớn.", "Một sự thay đổi cơ bản trong chiến lược hoặc mô hình kinh doanh của startup sau khi nhận thấy hướng đi hiện tại không hiệu quả, dựa trên phản hồi từ thị trường.", "Sáp nhập với một công ty lớn hơn."], a: "Một sự thay đổi cơ bản trong chiến lược hoặc mô hình kinh doanh của startup sau khi nhận thấy hướng đi hiện tại không hiệu quả, dựa trên phản hồi từ thị trường." },
+                    { q: "Đâu là một trong những rủi ro lớn nhất mà các startup thường phải đối mặt?", o: ["Rủi ro về việc sản phẩm quá tốt so với nhu cầu thị trường.", "Rủi ro về việc thị trường không chấp nhận sản phẩm/dịch vụ.", "Rủi ro về việc có quá nhiều nhân tài muốn gia nhập công ty.", "Rủi ro về việc lợi nhuận tăng trưởng quá nhanh."], a: "Rủi ro về việc thị trường không chấp nhận sản phẩm/dịch vụ." },
+                    { q: "Tinh thần 'thất bại nhanh, học hỏi nhanh' (fail fast, learn fast) trong văn hóa khởi nghiệp có ý nghĩa gì?", o: ["Khuyến khích sự cẩu thả và thiếu trách nhiệm.", "Chấp nhận rằng thất bại là một phần của quá trình đổi mới.", "Cố gắng tránh mọi thất bại bằng mọi giá.", "Chỉ tập trung vào việc học hỏi lý thuyết, không cần thực hành nhiều."], a: "Chấp nhận rằng thất bại là một phần của quá trình đổi mới." },
+                    { q: "Anh/Chị có một ý tưởng kinh doanh sản phẩm thủ công mỹ nghệ độc đáo. Bước thực tế đầu tiên Anh/Chị nên làm để kiểm tra tính khả thi của ý tưởng là gì?", o: ["Vay một khoản tiền lớn để mở ngay một cửa hàng hoành tráng.", "Đăng ký bản quyền cho tất cả các thiết kế sản phẩm.", "Làm thử một vài sản phẩm mẫu, giới thiệu cho Anh/Chị bè, người thân hoặc bán thử.", "Viết một kế hoạch kinh doanh chi tiết dài 50 trang."], a: "Làm thử một vài sản phẩm mẫu, giới thiệu cho Anh/Chị bè, người thân hoặc bán thử." },
+                    { q: "Khi trình bày ý tưởng khởi nghiệp của mình với một nhà đầu tư tiềm năng, Anh/Chị nên tập trung nhấn mạnh vào yếu tố nào nhất?", o: ["Kể chi tiết về quá trình Anh/Chị nảy ra ý tưởng.", "Vấn đề mà startup của Anh/Chị giải quyết, giải pháp độc đáo, quy mô thị trường tiềm năng, đội ngũ thực hiện và kế hoạch sử dụng vốn.", "Những khó khăn và rủi ro mà Anh/Chị dự đoán sẽ gặp phải.", "So sánh chi tiết từng tính năng sản phẩm của Anh/Chị với tất cả các đối thủ."], a: "Vấn đề mà startup của Anh/Chị giải quyết, giải pháp độc đáo, quy mô thị trường tiềm năng, đội ngũ thực hiện và kế hoạch sử dụng vốn." },
+                    { q: "Anh/Chị muốn khởi nghiệp một quán cà phê nhỏ. Việc lựa chọn địa điểm kinh doanh cần dựa trên những tiêu chí thực tế nào?", o: ["Chọn địa điểm có giá thuê mặt bằng rẻ nhất.", "Chọn địa điểm gần nhà Anh/Chị nhất để tiện đi lại.", "Phân tích đối tượng khách hàng mục tiêu, mật độ dân cư, mức độ...", "Chọn địa điểm theo sở thích cá nhân về không gian."], a: "Phân tích đối tượng khách hàng mục tiêu, mật độ dân cư, mức độ..." },
+                    { q: "Để quản lý tài chính hiệu quả cho một startup mới thành lập với nguồn vốn hạn hẹp, Anh/Chị cần ưu tiên làm gì?", o: ["Chi tiêu mạnh tay cho marketing để nhanh chóng được nhiều người biết đến.", "Tuyển dụng ngay một đội ngũ nhân sự đông đảo.", "Lập kế hoạch chi tiêu, theo dõi sát khoản thu chi.", "Mua sắm trang thiết bị văn phòng hiện đại nhất."], a: "Lập kế hoạch chi tiêu, theo dõi sát khoản thu chi." },
+                    { q: "Anh/Chị nhận thấy một xu hướng mới nổi trên thị trường có thể tạo ra cơ hội kinh doanh. Hành động nào thể hiện tư duy khởi nghiệp nhạy bén?", o: ["Chờ đợi xem có ai khác thành công với xu hướng đó không rồi mới làm theo.", "Bỏ qua vì cho rằng đó chỉ là trào lưu nhất thời.", "Nhanh chóng nghiên cứu sâu hơn về xu hướng, đánh giá tiềm năng.", "Phê phán những người chạy theo xu hướng mới."], a: "Nhanh chóng nghiên cứu sâu hơn về xu hướng, đánh giá tiềm năng." },
+                    { q: "Xây dựng một mạng lưới quan hệ (networking) tốt có lợi ích gì đối với một nhà khởi nghiệp?", o: ["Chỉ để có thêm Anh/Chị bè giao lưu.", "Có thể mang lại cơ hội hợp tác, học hỏi kinh nghiệm, tìm kiếm nhà đầu tư.", "Gây mất thời gian và không mang lại lợi ích thực tế cho kinh doanh.", "Chỉ cần thiết khi startup đã thành công lớn."], a: "Có thể mang lại cơ hội hợp tác, học hỏi kinh nghiệm, tìm kiếm nhà đầu tư." },
+                    { q: "Một trong những cách hiệu quả để marketing cho một startup có ngân sách eo hẹp là gì?", o: ["Chi tiền cho các quảng cáo đắt đỏ trên truyền hình quốc gia.", "Sử dụng các kênh marketing trực tuyến chi phí thấp hoặc miễn phí, xây dựng cộng đồng và khuyến khích marketing truyền miệng.", "Thuê một người nổi tiếng làm đại sứ thương hiệu với chi phí cao.", "In thật nhiều tờ rơi và phát ở khắp mọi nơi."], a: "Sử dụng các kênh marketing trực tuyến chi phí thấp hoặc miễn phí, xây dựng cộng đồng và khuyến khích marketing truyền miệng." },
+                    { q: "Khi startup của Anh/Chị gặp phải những phản hồi tiêu cực từ những khách hàng đầu tiên, Anh/Chị nên làm gì?", o: ["Bỏ qua những phản hồi đó vì cho rằng khách hàng không hiểu sản phẩm.", "Tranh cãi với khách hàng để chứng minh sản phẩm của mình là tốt nhất.", "Lắng nghe một cách nghiêm túc, cảm ơn phản hồi, phân tích.", "Ngừng bán sản phẩm đó ngay lập tức."], a: "Lắng nghe một cách nghiêm túc, cảm ơn phản hồi, phân tích." },
+                    { q: "Thái độ nào sau đây là cần thiết để một nhà khởi nghiệp vượt qua những khó khăn và thử thách ban đầu?", o: ["Dễ dàng nản lòng và từ bỏ khi gặp thất bại.", "Luôn cho rằng ý tưởng của mình là hoàn hảo và không cần thay đổi.", "Kiên trì, linh hoạt, sẵn sàng học hỏi, chấp nhận rủi ro và có niềm tin vào tầm nhìn của mình.", "Chỉ tập trung vào việc kiếm tiền nhanh chóng."], a: "Kiên trì, linh hoạt, sẵn sàng học hỏi, chấp nhận rủi ro và có niềm tin vào tầm nhìn của mình." },
+                    { q: "Anh/Chị muốn mở một dịch vụ giao đồ ăn healthy tại khu vực văn phòng. Việc khảo sát nhu cầu thực tế của nhân viên văn phòng (ví dụ: họ thường ăn gì, mức chi tiêu, mối quan tâm về sức khỏe) thuộc bước nào trong quá trình khởi nghiệp?", o: ["Phát triển sản phẩm hoàn chỉnh.", "Kêu gọi vốn đầu tư.", "Nghiên cứu thị trường và xác định khách hàng mục tiêu.", "Xây dựng chiến lược marketing quy mô lớn."], a: "Nghiên cứu thị trường và xác định khách hàng mục tiêu." }
+                ]
+            }
+        ];
+
+        // --- LOGIC CỦA QUIZ ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+
+        const progressEl = document.getElementById('progress');
+        const scorePreviewEl = document.getElementById('score-preview');
+        const sectionTitleEl = document.getElementById('section-title');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const finalScoreEl = document.getElementById('final-score');
+
+        // Flatten the questions for easier indexing
+        const allQuestions = quizData.flatMap(section => 
+            section.questions.map(q => ({...q, section: section.section}))
+        );
+        const totalQuestions = allQuestions.length;
+
+        let shuffledQuestions = [];
+        let userAnswers = [];
+        let currentQuestionIndex = 0;
+
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            currentQuestionIndex = 0;
+            shuffledQuestions = shuffleArray([...allQuestions]);
+            userAnswers = new Array(totalQuestions).fill(null);
+            
+            updateScorePreview();
+            showQuestion();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function showQuestion() {
+            // Reset options
+            optionsContainer.innerHTML = '';
+
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            // Display question and progress
+            questionTextEl.textContent = currentQuestion.q;
+            sectionTitleEl.textContent = currentQuestion.section;
+            progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${totalQuestions}`;
+
+            // Create option buttons
+            currentQuestion.o.forEach((optionText, index) => {
+                const button = document.createElement('button');
+                button.textContent = optionText;
+                button.classList.add('option-btn', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400');
+                button.addEventListener('click', () => selectAnswer(index));
+                optionsContainer.appendChild(button);
+            });
+
+            // Restore previous state if exists
+            if (userAnswers[currentQuestionIndex] !== null) {
+                showFeedback();
+            } else {
+                optionsContainer.classList.remove('disabled');
+            }
+
+            updateNavigation();
+        }
+        
+        function selectAnswer(selectedIndex) {
+            userAnswers[currentQuestionIndex] = selectedIndex;
+            showFeedback();
+            updateScorePreview();
+        }
+
+        function showFeedback() {
+            optionsContainer.classList.add('disabled');
+            const selectedIndex = userAnswers[currentQuestionIndex];
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const correctAnswer = currentQuestion.a;
+            
+            const allOptionButtons = optionsContainer.querySelectorAll('.option-btn');
+
+            allOptionButtons.forEach((btn, index) => {
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                }
+                if (index === selectedIndex && btn.textContent !== correctAnswer) {
+                    btn.classList.add('incorrect');
+                }
+            });
+        }
+
+        function updateNavigation() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            if (currentQuestionIndex === totalQuestions - 1) {
+                nextBtn.textContent = 'Hoàn thành';
+            } else {
+                nextBtn.textContent = 'Tiếp theo →';
+            }
+        }
+
+        function updateScorePreview() {
+            const score = userAnswers.reduce((acc, answer, index) => {
+                if (answer !== null && shuffledQuestions[index].o[answer] === shuffledQuestions[index].a) {
+                    return acc + 1;
+                }
+                return acc;
+            }, 0);
+            scorePreviewEl.textContent = `Điểm: ${score}`;
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const finalScore = userAnswers.reduce((acc, answer, index) => {
+                if (answer !== null && shuffledQuestions[index].o[answer] === shuffledQuestions[index].a) {
+                    return acc + 1;
+                }
+                return acc;
+            }, 0);
+
+            finalScoreEl.textContent = `${finalScore} / ${totalQuestions}`;
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+
+    </script>
+</body>
+</html>
