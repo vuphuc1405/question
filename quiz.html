@@ -63,6 +63,7 @@
             <div id="header" class="flex justify-between items-center mb-6">
                 <div id="progress" class="text-lg font-semibold text-indigo-600 dark:text-indigo-400"></div>
                 <div id="score-preview" class="text-lg font-semibold text-green-600 dark:text-green-400">Điểm: 0</div>
+                <button id="end-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-all duration-200 text-sm">Kết thúc sớm</button>
             </div>
             <div id="question-container"
                 class="mb-6 h-48 p-6 bg-gray-50 dark:bg-gray-800/60 rounded-xl overflow-y-auto">
@@ -105,6 +106,7 @@
 
     <script>
         const quizData = [
+            // Dữ liệu câu hỏi của bạn giữ nguyên...
             {
                 section: "PHẦN 1: KIẾN THỨC NỀN TẢNG VỀ QUẢN TRỊ",
                 questions: [
@@ -213,7 +215,8 @@
                     { q: "Anh/Chị muốn mở một dịch vụ giao đồ ăn healthy tại khu vực văn phòng. Việc khảo sát nhu cầu thực tế của nhân viên văn phòng (ví dụ: họ thường ăn gì, mức chi tiêu, mối quan tâm về sức khỏe) thuộc bước nào trong quá trình khởi nghiệp?", o: ["Phát triển sản phẩm hoàn chỉnh.", "Kêu gọi vốn đầu tư.", "Nghiên cứu thị trường và xác định khách hàng mục tiêu.", "Xây dựng chiến lược marketing quy mô lớn."], a: "Nghiên cứu thị trường và xác định khách hàng mục tiêu." }
                 ]
             }
-        ];        // -- Các biến DOM --
+        ];
+        // -- Các biến DOM --
 
         const quizScreen = document.getElementById('quiz-screen');
         const resultScreen = document.getElementById('result-screen');
@@ -226,6 +229,9 @@
         const optionsContainer = document.getElementById('options-container');
         const finalScoreEl = document.getElementById('final-score');
         const resultMessageEl = document.getElementById('result-message');
+        
+        // THÊM BIẾN CHO NÚT KẾT THÚC
+        const endBtn = document.getElementById('end-btn');
 
         let questionsToLoad = [];
         let totalQuestions = 0;
@@ -380,7 +386,8 @@
 
             const finalScore = userAnswers.filter((answer, index) => answer !== null && shuffledQuestions[index].o[answer] === shuffledQuestions[index].a).length;
             finalScoreEl.textContent = `${finalScore} / ${totalQuestions}`;
-
+            resultMessageEl.textContent = "Bạn đã kết thúc bài làm của mình." // Cập nhật thông báo
+            
             // Tự động lưu điểm ngay khi hiển thị kết quả
             autoSaveScore(finalScore);
         }
@@ -389,6 +396,15 @@
         restartBtn.addEventListener('click', startQuiz);
         prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; showQuestion(); } });
         nextBtn.addEventListener('click', nextQuestion);
+        
+        // THÊM SỰ KIỆN CHO NÚT KẾT THÚC
+        endBtn.addEventListener('click', () => {
+            // Thêm một hộp thoại xác nhận để tránh người dùng bấm nhầm
+            const userConfirmed = confirm("Bạn có chắc chắn muốn kết thúc bài làm không? Điểm số sẽ được tính dựa trên các câu đã trả lời.");
+            if (userConfirmed) {
+                showResults();
+            }
+        });
     </script>
 </body>
 
