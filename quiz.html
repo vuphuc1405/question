@@ -85,18 +85,21 @@
             <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">Hoàn thành!</h2>
             <p id="result-message" class="text-xl text-gray-600 dark:text-gray-300 mb-6">Bạn đã trả lời hết các câu hỏi.
             </p>
-            <div class="text-2xl font-bold mb-8">
+            <div class="text-2xl font-bold mb-6">
                 <span class="text-gray-800 dark:text-white">Điểm cuối cùng của bạn: </span>
                 <span id="final-score" class="text-green-500"></span>
             </div>
-            <button id="restart-btn"
-                class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg shadow-md">
-                Chơi lại
-            </button>
-            <a href="index.html"
-                class="mt-4 inline-block bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-colors duration-300 text-lg shadow-md">
-                Chọn level khác
-            </a>
+
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="restart-btn"
+                    class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg shadow-md">
+                    Chơi lại
+                </button>
+                <a href="index.html"
+                    class="inline-flex items-center justify-center bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-colors duration-300 text-lg shadow-md">
+                    Chọn level khác
+                </a>
+            </div>
         </div>
     </div>
 
@@ -210,7 +213,8 @@
                     { q: "Anh/Chị muốn mở một dịch vụ giao đồ ăn healthy tại khu vực văn phòng. Việc khảo sát nhu cầu thực tế của nhân viên văn phòng (ví dụ: họ thường ăn gì, mức chi tiêu, mối quan tâm về sức khỏe) thuộc bước nào trong quá trình khởi nghiệp?", o: ["Phát triển sản phẩm hoàn chỉnh.", "Kêu gọi vốn đầu tư.", "Nghiên cứu thị trường và xác định khách hàng mục tiêu.", "Xây dựng chiến lược marketing quy mô lớn."], a: "Nghiên cứu thị trường và xác định khách hàng mục tiêu." }
                 ]
             }
-        ];
+        ];        // -- Các biến DOM --
+
         const quizScreen = document.getElementById('quiz-screen');
         const resultScreen = document.getElementById('result-screen');
         const restartBtn = document.getElementById('restart-btn');
@@ -218,7 +222,6 @@
         const prevBtn = document.getElementById('prev-btn');
         const progressEl = document.getElementById('progress');
         const scorePreviewEl = document.getElementById('score-preview');
-        const sectionTitleEl = document.getElementById('section-title');
         const questionTextEl = document.getElementById('question-text');
         const optionsContainer = document.getElementById('options-container');
         const finalScoreEl = document.getElementById('final-score');
@@ -229,6 +232,7 @@
         let shuffledQuestions = [];
         let userAnswers = [];
         let currentQuestionIndex = 0;
+        let currentLevelKey = 'all';
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -247,11 +251,11 @@
             );
 
             if (selectedSectionName) {
+                currentLevelKey = selectedSectionName;
                 const partData = quizData.find(part => part.section === selectedSectionName);
-                if (partData) {
-                    questionsToLoad = partData.questions.map(q => ({ ...q, section: partData.section }));
-                }
+                if (partData) questionsToLoad = partData.questions.map(q => ({ ...q, section: partData.section }));
             } else if (selectedMode) {
+                currentLevelKey = selectedMode;
                 if (selectedMode === 'random') {
                     const RANDOM_QUESTION_COUNT = 10;
                     questionsToLoad = shuffleArray([...allQuestions]).slice(0, RANDOM_QUESTION_COUNT);
@@ -262,7 +266,8 @@
             }
 
             if (questionsToLoad.length === 0) {
-                questionsToLoad = allQuestions; // Mặc định là tất cả nếu không có lựa chọn hợp lệ
+                currentLevelKey = 'all';
+                questionsToLoad = allQuestions;
             }
 
             totalQuestions = questionsToLoad.length;
@@ -281,13 +286,8 @@
 
         function showQuestion() {
             optionsContainer.innerHTML = '';
-            questionTextEl.classList.add('text-center');
             const currentQuestion = shuffledQuestions[currentQuestionIndex];
-
-            if (!currentQuestion) {
-                console.error("Không có câu hỏi để hiển thị. Kiểm tra lại logic tải câu hỏi.");
-                return;
-            }
+            if (!currentQuestion) return;
 
             questionTextEl.textContent = currentQuestion.q;
             progressEl.textContent = `Câu ${currentQuestionIndex + 1}/${totalQuestions}`;
@@ -295,18 +295,14 @@
             currentQuestion.o.forEach((optionText, index) => {
                 const button = document.createElement('button');
                 button.textContent = optionText;
-                button.classList.add('option-btn', 'w-full', 'p-4', 'h-24', 'flex', 'items-center', 'text-left',
-                    'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg',
-                    'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400');
+                button.classList.add('option-btn', 'w-full', 'p-4', 'h-24', 'flex', 'items-center', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400');
                 button.addEventListener('click', () => selectAnswer(index));
                 optionsContainer.appendChild(button);
             });
 
-            if (userAnswers[currentQuestionIndex] !== null) {
-                showFeedback();
-            } else {
-                optionsContainer.classList.remove('disabled');
-            }
+            if (userAnswers[currentQuestionIndex] !== null) showFeedback();
+            else optionsContainer.classList.remove('disabled');
+
             updateNavigation();
         }
 
@@ -322,42 +318,20 @@
             const currentQuestion = shuffledQuestions[currentQuestionIndex];
             const correctAnswer = currentQuestion.a;
 
-            const allOptionButtons = optionsContainer.querySelectorAll('.option-btn');
-
-            allOptionButtons.forEach((btn, index) => {
-                if (btn.textContent === correctAnswer) {
-                    btn.classList.add('correct');
-                }
-                if (index === selectedIndex && btn.textContent !== correctAnswer) {
-                    btn.classList.add('incorrect');
-                }
+            optionsContainer.querySelectorAll('.option-btn').forEach((btn, index) => {
+                if (btn.textContent === correctAnswer) btn.classList.add('correct');
+                if (index === selectedIndex && btn.textContent !== correctAnswer) btn.classList.add('incorrect');
             });
         }
 
         function updateNavigation() {
             prevBtn.disabled = currentQuestionIndex === 0;
-            if (currentQuestionIndex === totalQuestions - 1) {
-                nextBtn.textContent = 'Hoàn thành';
-            } else {
-                nextBtn.textContent = 'Tiếp theo →';
-            }
+            nextBtn.textContent = (currentQuestionIndex === totalQuestions - 1) ? 'Hoàn thành' : 'Tiếp theo →';
         }
 
         function updateScorePreview() {
-            const score = userAnswers.reduce((acc, answer, index) => {
-                if (answer !== null && shuffledQuestions[index].o[answer] === shuffledQuestions[index].a) {
-                    return acc + 1;
-                }
-                return acc;
-            }, 0);
+            const score = userAnswers.filter((answer, index) => answer !== null && shuffledQuestions[index].o[answer] === shuffledQuestions[index].a).length;
             scorePreviewEl.textContent = `Điểm: ${score}`;
-        }
-
-        function prevQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                showQuestion();
-            }
         }
 
         function nextQuestion() {
@@ -369,22 +343,51 @@
             }
         }
 
+        // *** LOGIC TỰ ĐỘNG LƯU ĐIỂM ***
+        function autoSaveScore(score) {
+            let playerName = localStorage.getItem('quizPlayerName');
+
+            if (!playerName) {
+                playerName = prompt("Chúc mừng bạn đã hoàn thành! Vui lòng nhập tên của bạn để lưu vào Bảng Xếp Hạng:", "Người chơi");
+                if (playerName) {
+                    localStorage.setItem('quizPlayerName', playerName);
+                } else {
+                    playerName = "Người chơi ẩn danh"; // Tên mặc định nếu người dùng không nhập
+                }
+            }
+
+            const newScoreEntry = {
+                name: playerName,
+                score: score,
+                total: totalQuestions,
+                date: new Date().toISOString()
+            };
+
+            const leaderboards = JSON.parse(localStorage.getItem('quizLeaderboards')) || {};
+            const currentLeaderboard = leaderboards[currentLevelKey] || [];
+
+            currentLeaderboard.push(newScoreEntry);
+            currentLeaderboard.sort((a, b) => b.score - a.score);
+            leaderboards[currentLevelKey] = currentLeaderboard.slice(0, 10);
+
+            localStorage.setItem('quizLeaderboards', JSON.stringify(leaderboards));
+            console.log("Đã tự động lưu điểm cho:", playerName);
+        }
+
         function showResults() {
             quizScreen.classList.add('hidden');
             resultScreen.classList.remove('hidden');
 
-            const finalScore = userAnswers.reduce((acc, answer, index) => {
-                if (answer !== null && shuffledQuestions[index].o[answer] === shuffledQuestions[index].a) {
-                    return acc + 1;
-                }
-                return acc;
-            }, 0);
-
+            const finalScore = userAnswers.filter((answer, index) => answer !== null && shuffledQuestions[index].o[answer] === shuffledQuestions[index].a).length;
             finalScoreEl.textContent = `${finalScore} / ${totalQuestions}`;
+
+            // Tự động lưu điểm ngay khi hiển thị kết quả
+            autoSaveScore(finalScore);
         }
 
+        // -- Gán sự kiện --
         restartBtn.addEventListener('click', startQuiz);
-        prevBtn.addEventListener('click', prevQuestion);
+        prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; showQuestion(); } });
         nextBtn.addEventListener('click', nextQuestion);
     </script>
 </body>

@@ -23,29 +23,36 @@
 
     <div class="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center">
         
-        <h1 class="text-4xl sm:text-5xl font-bold text-gray-800">Chọn Level</h1>
-        <p class="text-gray-500 mt-2 text-lg h-6" id="description-text">Chọn một chế độ để bắt đầu thử thách.</p>
+        <div class="grid md:grid-cols-2 gap-8">
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-bold text-gray-800">Chọn Level</h1>
+                <p class="text-gray-500 mt-2 text-lg h-12" id="description-text">Chọn một chế độ để bắt đầu thử thách.</p>
 
-        <div class="my-8">
-            <a href="#" id="continue-btn" class="w-full sm:w-auto inline-block bg-violet-600 text-white font-bold text-xl py-4 px-16 rounded-lg hover:bg-violet-700 transition-all duration-200 shadow-lg shadow-violet-500/30">
-                Bắt đầu
-            </a>
-        </div>
-        
-        <div id="levels-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6 max-w-md mx-auto">
-            
-            <div class="card p-6 rounded-2xl cursor-pointer relative" data-type="mode" data-value="random">
-                <h3 class="text-xl font-bold text-gray-800">Ngẫu nhiên</h3>
-                <p class="text-sm text-gray-500 mt-1">10 câu bất kỳ</p>
-                <div class="checkmark hidden absolute -top-2 -right-2 bg-violet-600 text-white w-7 h-7 rounded-full items-center justify-center border-2 border-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg></div>
+                <div class="my-6">
+                    <a href="#" id="continue-btn" class="w-full sm:w-auto inline-block bg-violet-600 text-white font-bold text-xl py-4 px-16 rounded-lg hover:bg-violet-700 transition-all duration-200 shadow-lg shadow-violet-500/30">
+                        Bắt đầu
+                    </a>
+                </div>
+                
+                <div id="levels-grid" class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="card p-4 rounded-2xl cursor-pointer relative" data-type="mode" data-value="random">
+                        <h3 class="text-xl font-bold text-gray-800">Ngẫu nhiên</h3>
+                        <p class="text-sm text-gray-500 mt-1">10 câu bất kỳ</p>
+                        <div class="checkmark hidden absolute -top-2 -right-2 bg-violet-600 text-white w-7 h-7 rounded-full items-center justify-center border-2 border-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg></div>
+                    </div>
+                    <div class="card p-4 rounded-2xl cursor-pointer relative" data-type="mode" data-value="all">
+                        <h3 class="text-xl font-bold text-gray-800">Tất cả</h3>
+                        <p class="text-sm text-gray-500 mt-1">Toàn bộ câu hỏi</p>
+                        <div class="checkmark hidden absolute -top-2 -right-2 bg-violet-600 text-white w-7 h-7 rounded-full items-center justify-center border-2 border-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="card p-6 rounded-2xl cursor-pointer relative" data-type="mode" data-value="all">
-                <h3 class="text-xl font-bold text-gray-800">Tất cả</h3>
-                <p class="text-sm text-gray-500 mt-1">Toàn bộ câu hỏi</p>
-                <div class="checkmark hidden absolute -top-2 -right-2 bg-violet-600 text-white w-7 h-7 rounded-full items-center justify-center border-2 border-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg></div>
+            <div class="bg-gray-50 dark:bg-gray-800/60 p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Bảng Xếp Hạng</h2>
+                <div id="leaderboard-content" class="text-left space-y-3">
+                    </div>
             </div>
-
         </div>
     </div>
 
@@ -53,12 +60,49 @@
         const cards = document.querySelectorAll('.card');
         const descriptionText = document.getElementById('description-text');
         const continueBtn = document.getElementById('continue-btn');
+        const leaderboardContent = document.getElementById('leaderboard-content');
 
-        // Chỉ giữ lại mô tả cho 2 level
         const descriptions = {
             "random": "Một thử thách gồm 10 câu hỏi ngẫu nhiên được rút ra từ toàn bộ ngân hàng đề.",
             "all": "Thử thách cuối cùng với toàn bộ các câu hỏi trong ngân hàng đề."
         };
+
+        function displayLeaderboard(levelKey) {
+            leaderboardContent.innerHTML = ''; // Xóa bảng xếp hạng cũ
+            const leaderboards = JSON.parse(localStorage.getItem('quizLeaderboards')) || {};
+            const boardData = leaderboards[levelKey] || [];
+
+            if (boardData.length === 0) {
+                leaderboardContent.innerHTML = `<p class="text-gray-500 text-center italic">Chưa có dữ liệu cho level này.</p>`;
+                return;
+            }
+
+            const list = document.createElement('ol');
+            list.className = 'space-y-3';
+            
+            // Chỉ hiển thị top 5
+            boardData.slice(0, 5).forEach((entry, index) => {
+                const item = document.createElement('li');
+                item.className = 'flex items-center justify-between bg-white dark:bg-gray-700 p-3 rounded-lg shadow-sm';
+                const rank = index + 1;
+                
+                let rankDisplay;
+                if (rank === 1) rankDisplay = '🥇';
+                else if (rank === 2) rankDisplay = '🥈';
+                else if (rank === 3) rankDisplay = '🥉';
+                else rankDisplay = `#${rank}`;
+
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="font-bold text-lg w-8">${rankDisplay}</span>
+                        <span class="font-semibold text-gray-700 dark:text-gray-200">${entry.name}</span>
+                    </div>
+                    <span class="font-bold text-indigo-500">${entry.score}/${entry.total}</span>
+                `;
+                list.appendChild(item);
+            });
+            leaderboardContent.appendChild(list);
+        }
 
         function selectCard(cardElement) {
             const type = cardElement.dataset.type;
@@ -69,12 +113,14 @@
             
             descriptionText.innerText = descriptions[value];
             
-            // Logic này vẫn đúng, không cần thay đổi
             if (type === 'section') {
                 continueBtn.href = `quiz.html?section=${encodeURIComponent(value)}`;
-            } else { // type === 'mode'
+            } else {
                 continueBtn.href = `quiz.html?mode=${value}`;
             }
+
+            // Hiển thị bảng xếp hạng cho level được chọn
+            displayLeaderboard(value);
         }
 
         cards.forEach(card => {
@@ -83,7 +129,7 @@
             });
         });
 
-        // Tự động chọn Level "Ngẫu nhiên" khi tải trang để làm mặc định
+        // Tự động chọn và hiển thị BXH cho level "Ngẫu nhiên" khi tải trang
         const initialCard = document.querySelector('[data-value="random"]');
         if(initialCard) {
             selectCard(initialCard);
